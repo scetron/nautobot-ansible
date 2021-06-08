@@ -212,6 +212,7 @@
     - "nautobot"
   when:
     - "os_family == 'redhat'"
+    - "ansible_facts['distribution_major_version'] == '8'"
   block:
     - name: "GATHER RULES IN FIREWALL-CMD"
       ansible.builtin.command: "firewall-cmd --list-all"
