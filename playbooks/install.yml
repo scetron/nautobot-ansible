@@ -12,7 +12,7 @@
     nautobot_db_name: "nautobot"
     nautobot_db_username: "nautobot"
     nautobot_db_password: "insecure_password" # This should be changed
-    redis_password: "insecure_redis_password" # This should be changed
+    redis_password: "very_secur_password" # This should be changed
   tasks:
     - name: "SET SHORT FACTS"
       set_fact:
@@ -34,10 +34,9 @@
       block:
         - name: "ENABLE SUBSCRIPTION MANAGER REPOS"
           rhsm_repository:
-            name: "{{ item }}"
-          loop:
-            - "rhel-*-optional-rpms"
-            - "rhel-*-extras-rpms"
+            name: 
+              - "rhel-*-optional-rpms"
+              - "rhel-*-extras-rpms"            
           when: "ansible_distribution == 'Red Hat Enterprise Linux'"
 
         - name: "INCLUDE GEERLINGGUY EPEL ROLE"
@@ -52,25 +51,16 @@
           when:
             - "ansible_facts['distribution_major_version'] == '7'"
           yum:
-            name: "{{ item }}"
+            name: 
+              - "https://download.postgresql.org/pub/repos/yum/reporpms/EL-7-x86_64/pgdg-redhat-repo-latest.noarch.rpm"
+              - "http://rpms.remirepo.net/enterprise/remi-release-7.rpm"
             state: "present"
           loop:
-            - "https://download.postgresql.org/pub/repos/yum/reporpms/EL-7-x86_64/pgdg-redhat-repo-latest.noarch.rpm"
-            - "http://rpms.remirepo.net/enterprise/remi-release-7.rpm"
+            
           tags:
             - "rhel7"
             - "redis"
             - "all"
-
-        # - name: "ENABLE REMI REPO FOR REDIS INSTALL"
-        #   become: true
-        #   when:
-        #     - "ansible_facts['distribution_major_version'] == '7'"
-        #   yum_repository:
-        #     name: "remi"
-        #     baseurl: "http://rpms.remirepo.net/enterprise/remi-release-7.rpm"
-        #     description: "remi repo for redis"
-        #     state: "present"
 
         - name: "ENSURE REDIS IS INSTALLED"
           become: true
@@ -78,8 +68,6 @@
             name: "redis"
             state: present
             enablerepo: "remi,remi-safe"
-
-        - meta: end_play
 
         - name: "INCLUDE ROLE - REDIS"
           include_role:
